@@ -1,5 +1,5 @@
 public class YukonGoldPotato extends Potato implements Scorable{
-    public YukonGoldPotato(String potatoId, String name, String type) {
+    public YukonGoldPotato(String potatoId, String name) {
         super(potatoId, name, "YukonGoldPotato");
     }
     @Override

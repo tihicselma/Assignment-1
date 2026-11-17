@@ -1,6 +1,6 @@
 public class RussetPotato extends Potato implements Scorable{
-    public RussetPotato(String potatoId, String name, String type) {
-        super(potatoId, name, "RUSSETyea");
+    public RussetPotato(String potatoId, String name) {
+        super(potatoId, name, "RUSSET");
     }
 
     @Override

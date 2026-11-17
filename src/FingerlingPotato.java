@@ -1,5 +1,5 @@
 public class FingerlingPotato extends Potato implements Scorable{
-    public FingerlingPotato(String potatoId, String name, int maxPayloadKg)
+    public FingerlingPotato(String potatoId, String name)
     {
         super(potatoId, name, "FINGERLING");
     }

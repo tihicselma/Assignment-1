@@ -1,5 +1,5 @@
 public class PurplePotato extends Potato implements Scorable{
-    public PurplePotato(String potatoId, String name, int maxPayloadKg)
+    public PurplePotato(String potatoId, String name)
     {
         super(potatoId, name, "PURPLE");
     }
