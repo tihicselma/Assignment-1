@@ -13,9 +13,12 @@ public class Main {
             ReportGenerator.generateLauncherActivity(launchers, attempts, "output/02_launcher_activity.csv");
 
             System.out.println("Uspješno generisani izvještaji 1 i 2 u output/ folderu!");
-
+            ReportGenerator.generateLaunchResultsByPair(attempts, "output/03_launch_results_by_pair.csv");
+            ReportGenerator.generatePayloadViolations(attempts, "output/04_payload_violations.csv");
+            ReportGenerator.generateBestTestFlights(attempts, "output/05_best_test_flights.csv");
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }

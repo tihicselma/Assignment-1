@@ -80,4 +80,96 @@ public class ReportGenerator {
             }
         }
     }
+    public static void generateLaunchResultsByPair(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
+        File file = new File(filepath);
+        file.getParentFile().mkdirs();
+
+        Map<String, int[]> pairDataMap = new LinkedHashMap<>();
+
+        for (LaunchAttempt attempt : attempts) {
+            Potato potato = attempt.getPotatoId();
+            Launcher launcher = attempt.getLauncherId();
+            if (potato == null || launcher == null) continue;
+
+            String pId = potato.getPotatoId();
+            String lId = launcher.getId();
+            String key = pId + "#" + lId;
+
+            pairDataMap.putIfAbsent(key, new int[]{0, 0});
+            int[] data = pairDataMap.get(key);
+            data[0] += 1;
+            data[1] += attempt.getScore();
+        }
+
+        List<String> sortedKeys = new ArrayList<>(pairDataMap.keySet());
+        Collections.sort(sortedKeys, new Comparator<String>() {
+            @Override
+            public int compare(String k1, String k2) {
+                String[] parts1 = k1.split("#");
+                String[] parts2 = k2.split("#");
+                int potatoCompare = parts1[0].compareTo(parts2[0]);
+                if (potatoCompare != 0) {
+                    return potatoCompare;
+                }
+                return parts1[1].compareTo(parts2[1]);
+            }
+        });
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            writer.println("potatoId,launcherId,attemptCount,totalPoints");
+            for (String key : sortedKeys) {
+                String[] parts = key.split("#");
+                writer.println(parts[0] + "," + parts[1] + "," + pairDataMap.get(key)[0] + "," + pairDataMap.get(key)[1]);
+            }
+        }
+    }
+    public static void generatePayloadViolations(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
+        File file = new File(filepath);
+        file.getParentFile().mkdirs();
+
+        List<LaunchAttempt> violations = new ArrayList<>();
+        for (LaunchAttempt attempt : attempts) {
+            Launcher launcher = attempt.getLauncherId();
+            if (launcher != null && attempt.getPayloadKg() > launcher.getMaxPayloadKg()) {
+                violations.add(attempt);
+            }
+        }
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            writer.println("attemptId,potatoId,launcherId,payloadKg,maxPayloadKg");
+            for (LaunchAttempt attempt : violations) {
+                writer.println(attempt.getAttemptId() + "," +
+                        attempt.getPotatoId().getPotatoId() + "," +
+                        attempt.getLauncherId().getId() + "," +
+                        attempt.getPayloadKg() + "," +
+                        attempt.getLauncherId().getMaxPayloadKg());
+            }
+        }
+    }
+
+    public static void generateBestTestFlights(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
+        File file = new File(filepath);
+        file.getParentFile().mkdirs();
+
+        List<LaunchAttempt> sortedAttempts = new ArrayList<>(attempts);
+        sortedAttempts.sort(new Comparator<LaunchAttempt>() {
+            @Override
+            public int compare(LaunchAttempt a1, LaunchAttempt a2) {
+                return Integer.compare(a2.getScore(), a1.getScore());
+            }
+        });
+
+        int limit = Math.min(3, sortedAttempts.size());
+
+        try (PrintWriter writer = new PrintWriter(file)) {
+            writer.println("attemptId,potatoId,launcherId,score");
+            for (int i = 0; i < limit; i++) {
+                LaunchAttempt attempt = sortedAttempts.get(i);
+                writer.println(attempt.getAttemptId() + "," +
+                        attempt.getPotatoId().getPotatoId() + "," +
+                        attempt.getLauncherId().getId() + "," +
+                        attempt.getScore());
+            }
+        }
+    }
 }
