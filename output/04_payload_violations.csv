@@ -1,5 +1,5 @@
-attemptId,potatoId,launcherId,payloadKg,maxPayloadKg
-A06,P03,L02,6,4
-A01,P02,L02,5,4
-A12,P01,L01,7,6
-A04,P04,L01,7,6
+attemptId,potatoId,launcherId,payloadKg,maxPayloadKg,excessKg
+A06,P03,L02,6,4.0,2.0
+A01,P02,L02,5,4.0,1.0
+A04,P04,L01,7,6.0,1.0
+A12,P01,L01,7,6.0,1.0
