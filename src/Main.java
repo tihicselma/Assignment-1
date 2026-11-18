@@ -4,12 +4,11 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         try {
-            // 1. Učitavanje podataka (Milestone 2)
+
             Map<String, Potato> potatoes = CsvReader.readPotatoes("input/potatoes.csv");
             Map<String, Launcher> launchers = CsvReader.readLaunchers("input/launchers.csv");
             List<LaunchAttempt> attempts = CsvReader.readAttempts("input/launch_attempts.csv", potatoes, launchers);
 
-            // 2. Generisanje izvještaja 1 i 2 (Milestone 3)
             ReportGenerator.generatePotatoFlightLog(potatoes, attempts, "output/01_potato_flight_log.csv");
             ReportGenerator.generateLauncherActivity(launchers, attempts, "output/02_launcher_activity.csv");
 
