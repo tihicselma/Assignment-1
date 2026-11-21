@@ -80,6 +80,7 @@ public class ReportGenerator {
             }
         }
     }
+
     public static void generateLaunchResultsByPair(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
         File file = new File(filepath);
         file.getParentFile().mkdirs();
@@ -123,6 +124,7 @@ public class ReportGenerator {
             }
         }
     }
+
     public static void generatePayloadViolations(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
         File file = new File(filepath);
         if (file.getParentFile() != null) {
@@ -137,16 +139,17 @@ public class ReportGenerator {
                 violations.add(attempt);
             }
         }
+
         violations.sort(new Comparator<LaunchAttempt>() {
             @Override
             public int compare(LaunchAttempt a1, LaunchAttempt a2) {
-                double excess1 = a1.getPayloadKg() - a1.getLauncherId().getMaxPayloadKg();
-                double excess2 = a2.getPayloadKg() - a2.getLauncherId().getMaxPayloadKg();
-                int excessCompare = Double.compare(excess2, excess1); // opadajuće
+                int excess1 = (a1.getLauncherId() != null) ? (a1.getPayloadKg() - a1.getLauncherId().getMaxPayloadKg()) : 0;
+                int excess2 = (a2.getLauncherId() != null) ? (a2.getPayloadKg() - a2.getLauncherId().getMaxPayloadKg()) : 0;
+                int excessCompare = Integer.compare(excess2, excess1);
                 if (excessCompare != 0) {
                     return excessCompare;
                 }
-                return a1.getAttemptId().compareTo(a2.getAttemptId()); // uzlazno
+                return a1.getAttemptId().compareTo(a2.getAttemptId());
             }
         });
 
@@ -155,8 +158,8 @@ public class ReportGenerator {
             for (LaunchAttempt attempt : violations) {
                 String potatoId = (attempt.getPotatoId() != null) ? attempt.getPotatoId().getPotatoId() : "";
                 String launcherId = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getId() : "";
-                double maxPayload = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getMaxPayloadKg() : 0.0;
-                double excess = attempt.getPayloadKg() - maxPayload;
+                int maxPayload = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getMaxPayloadKg() : 0;
+                int excess = attempt.getPayloadKg() - maxPayload;
                 writer.println(attempt.getAttemptId() + "," + potatoId + "," + launcherId + "," + attempt.getPayloadKg() + "," + maxPayload + "," + excess);
             }
         }

@@ -35,7 +35,8 @@ public class LaunchAttempt implements Comparable<LaunchAttempt> {
 
     public int getScore() {
         if (potatoId != null) {
-            return potatoId.calculateScore(payloadKg, flightRating);
+            Scorable scorable = potatoId;
+            return scorable.calculateScore(payloadKg, flightRating);
         }
         return 0;
     }
