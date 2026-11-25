@@ -1,4 +1,4 @@
-attemptId,potatoId,launcherId,score
-A04,P04,L01,33
-A08,P02,L03,28
-A01,P02,L02,23
+attemptId,potatoName,launcherName,flightRating,payloadKg,points
+A04,Major Mash,Spudnik One,5,7,33
+A12,Sir Spud,Spudnik One,5,7,19
+A03,Sir Spud,Spudnik One,5,6,17

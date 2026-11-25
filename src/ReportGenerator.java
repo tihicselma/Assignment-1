@@ -80,6 +80,7 @@ public class ReportGenerator {
             }
         }
     }
+
     public static void generateLaunchResultsByPair(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
         File file = new File(filepath);
         file.getParentFile().mkdirs();
@@ -123,52 +124,71 @@ public class ReportGenerator {
             }
         }
     }
+
     public static void generatePayloadViolations(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
         File file = new File(filepath);
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
         List<LaunchAttempt> violations = new ArrayList<>();
         for (LaunchAttempt attempt : attempts) {
+            if (attempt == null) continue;
             Launcher launcher = attempt.getLauncherId();
             if (launcher != null && attempt.getPayloadKg() > launcher.getMaxPayloadKg()) {
                 violations.add(attempt);
             }
         }
 
+        violations.sort(new Comparator<LaunchAttempt>() {
+            @Override
+            public int compare(LaunchAttempt a1, LaunchAttempt a2) {
+                int excess1 = (a1.getLauncherId() != null) ? (a1.getPayloadKg() - a1.getLauncherId().getMaxPayloadKg()) : 0;
+                int excess2 = (a2.getLauncherId() != null) ? (a2.getPayloadKg() - a2.getLauncherId().getMaxPayloadKg()) : 0;
+                int excessCompare = Integer.compare(excess2, excess1);
+                if (excessCompare != 0) {
+                    return excessCompare;
+                }
+                return a1.getAttemptId().compareTo(a2.getAttemptId());
+            }
+        });
+
         try (PrintWriter writer = new PrintWriter(file)) {
-            writer.println("attemptId,potatoId,launcherId,payloadKg,maxPayloadKg");
+            writer.println("attemptId,potatoId,launcherId,payloadKg,maxPayloadKg,excessKg");
             for (LaunchAttempt attempt : violations) {
-                writer.println(attempt.getAttemptId() + "," +
-                        attempt.getPotatoId().getPotatoId() + "," +
-                        attempt.getLauncherId().getId() + "," +
-                        attempt.getPayloadKg() + "," +
-                        attempt.getLauncherId().getMaxPayloadKg());
+                String potatoId = (attempt.getPotatoId() != null) ? attempt.getPotatoId().getPotatoId() : "";
+                String launcherId = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getId() : "";
+                int maxPayload = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getMaxPayloadKg() : 0;
+                int excess = attempt.getPayloadKg() - maxPayload;
+                writer.println(attempt.getAttemptId() + "," + potatoId + "," + launcherId + "," + attempt.getPayloadKg() + "," + maxPayload + "," + excess);
             }
         }
     }
 
     public static void generateBestTestFlights(List<LaunchAttempt> attempts, String filepath) throws FileNotFoundException {
         File file = new File(filepath);
-        file.getParentFile().mkdirs();
+        if (file.getParentFile() != null) {
+            file.getParentFile().mkdirs();
+        }
 
-        List<LaunchAttempt> sortedAttempts = new ArrayList<>(attempts);
-        sortedAttempts.sort(new Comparator<LaunchAttempt>() {
-            @Override
-            public int compare(LaunchAttempt a1, LaunchAttempt a2) {
-                return Integer.compare(a2.getScore(), a1.getScore());
+        List<LaunchAttempt> sortedAttempts = new ArrayList<>();
+        for (LaunchAttempt attempt : attempts) {
+            if (attempt != null) {
+                sortedAttempts.add(attempt);
             }
-        });
+        }
+
+        Collections.sort(sortedAttempts);
 
         int limit = Math.min(3, sortedAttempts.size());
 
         try (PrintWriter writer = new PrintWriter(file)) {
-            writer.println("attemptId,potatoId,launcherId,score");
+            writer.println("attemptId,potatoName,launcherName,flightRating,payloadKg,points");
             for (int i = 0; i < limit; i++) {
                 LaunchAttempt attempt = sortedAttempts.get(i);
-                writer.println(attempt.getAttemptId() + "," +
-                        attempt.getPotatoId().getPotatoId() + "," +
-                        attempt.getLauncherId().getId() + "," +
-                        attempt.getScore());
+                String potatoName = (attempt.getPotatoId() != null) ? attempt.getPotatoId().getName() : "";
+                String launcherName = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getName() : "";
+                writer.println(attempt.getAttemptId() + "," + potatoName + "," + launcherName + "," + attempt.getFlightRating() + "," + attempt.getPayloadKg() + "," + attempt.getScore());
             }
         }
     }

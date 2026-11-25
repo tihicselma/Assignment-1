@@ -1,6 +1,6 @@
 public class YukonGoldPotato extends Potato implements Scorable{
     public YukonGoldPotato(String potatoId, String name) {
-        super(potatoId, name, "YukonGoldPotato");
+        super(potatoId, name, "YUKON_GOLD");
     }
     @Override
     public int calculateScore(int payloadKg, int flightRating) {
