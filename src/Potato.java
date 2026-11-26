@@ -1,7 +1,7 @@
 public abstract class Potato implements Scorable{
-    private String potatoId;
-    private String name;
-    private String type;
+    private final String potatoId;
+    private final String name;
+    private final String type;
    public Potato(String potatoId, String name, String type){
         this.potatoId = potatoId;
         this.name = name;

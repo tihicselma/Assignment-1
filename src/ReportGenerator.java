@@ -18,9 +18,7 @@ public class ReportGenerator {
         }
 
         for (LaunchAttempt attempt : attempts) {
-            Potato potato = attempt.getPotatoId();
-            if (potato == null) continue;
-
+            Potato potato = attempt.getPotato();
             String id = potato.getPotatoId();
             attemptCounts.put(id, attemptCounts.get(id) + 1);
             totalPoints.put(id, totalPoints.get(id) + attempt.getScore());
@@ -54,14 +52,12 @@ public class ReportGenerator {
         }
 
         for (LaunchAttempt attempt : attempts) {
-            Launcher launcher = attempt.getLauncherId();
-            if (launcher == null) continue;
-
+            Launcher launcher = attempt.getLauncher();
             String id = launcher.getId();
             attemptCounts.put(id, attemptCounts.get(id) + 1);
             totalPayloads.put(id, totalPayloads.get(id) + attempt.getPayloadKg());
 
-            if (attempt.getPayloadKg() > launcher.getMaxPayloadKg()) {
+            if (attempt.isOverLimit()) {
                 overLimitCounts.put(id, overLimitCounts.get(id) + 1);
             }
         }
@@ -88,9 +84,8 @@ public class ReportGenerator {
         Map<String, int[]> pairDataMap = new LinkedHashMap<>();
 
         for (LaunchAttempt attempt : attempts) {
-            Potato potato = attempt.getPotatoId();
-            Launcher launcher = attempt.getLauncherId();
-            if (potato == null || launcher == null) continue;
+            Potato potato = attempt.getPotato();
+            Launcher launcher = attempt.getLauncher();
 
             String pId = potato.getPotatoId();
             String lId = launcher.getId();
@@ -133,9 +128,7 @@ public class ReportGenerator {
 
         List<LaunchAttempt> violations = new ArrayList<>();
         for (LaunchAttempt attempt : attempts) {
-            if (attempt == null) continue;
-            Launcher launcher = attempt.getLauncherId();
-            if (launcher != null && attempt.getPayloadKg() > launcher.getMaxPayloadKg()) {
+            if (attempt.isOverLimit()) {
                 violations.add(attempt);
             }
         }
@@ -143,9 +136,7 @@ public class ReportGenerator {
         violations.sort(new Comparator<LaunchAttempt>() {
             @Override
             public int compare(LaunchAttempt a1, LaunchAttempt a2) {
-                int excess1 = (a1.getLauncherId() != null) ? (a1.getPayloadKg() - a1.getLauncherId().getMaxPayloadKg()) : 0;
-                int excess2 = (a2.getLauncherId() != null) ? (a2.getPayloadKg() - a2.getLauncherId().getMaxPayloadKg()) : 0;
-                int excessCompare = Integer.compare(excess2, excess1);
+                int excessCompare = Integer.compare(a2.getExcessKg(), a1.getExcessKg());
                 if (excessCompare != 0) {
                     return excessCompare;
                 }
@@ -156,10 +147,10 @@ public class ReportGenerator {
         try (PrintWriter writer = new PrintWriter(file)) {
             writer.println("attemptId,potatoId,launcherId,payloadKg,maxPayloadKg,excessKg");
             for (LaunchAttempt attempt : violations) {
-                String potatoId = (attempt.getPotatoId() != null) ? attempt.getPotatoId().getPotatoId() : "";
-                String launcherId = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getId() : "";
-                int maxPayload = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getMaxPayloadKg() : 0;
-                int excess = attempt.getPayloadKg() - maxPayload;
+                String potatoId = attempt.getPotato().getPotatoId();
+                String launcherId = attempt.getLauncher().getId();
+                int maxPayload = attempt.getLauncher().getMaxPayloadKg();
+                int excess = attempt.getExcessKg();
                 writer.println(attempt.getAttemptId() + "," + potatoId + "," + launcherId + "," + attempt.getPayloadKg() + "," + maxPayload + "," + excess);
             }
         }
@@ -171,13 +162,7 @@ public class ReportGenerator {
             file.getParentFile().mkdirs();
         }
 
-        List<LaunchAttempt> sortedAttempts = new ArrayList<>();
-        for (LaunchAttempt attempt : attempts) {
-            if (attempt != null) {
-                sortedAttempts.add(attempt);
-            }
-        }
-
+        List<LaunchAttempt> sortedAttempts = new ArrayList<>(attempts);
         Collections.sort(sortedAttempts);
 
         int limit = Math.min(3, sortedAttempts.size());
@@ -186,8 +171,8 @@ public class ReportGenerator {
             writer.println("attemptId,potatoName,launcherName,flightRating,payloadKg,points");
             for (int i = 0; i < limit; i++) {
                 LaunchAttempt attempt = sortedAttempts.get(i);
-                String potatoName = (attempt.getPotatoId() != null) ? attempt.getPotatoId().getName() : "";
-                String launcherName = (attempt.getLauncherId() != null) ? attempt.getLauncherId().getName() : "";
+                String potatoName = attempt.getPotato().getName();
+                String launcherName = attempt.getLauncher().getName();
                 writer.println(attempt.getAttemptId() + "," + potatoName + "," + launcherName + "," + attempt.getFlightRating() + "," + attempt.getPayloadKg() + "," + attempt.getScore());
             }
         }

@@ -55,7 +55,7 @@ public class CsvReader {
 
         try (Scanner scanner = new Scanner(file)) {
             if (scanner.hasNextLine()) {
-                scanner.nextLine(); // Skip the header line ("launcherId,name,maxPayloadKg")
+                scanner.nextLine();
             }
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine().trim();
@@ -74,6 +74,7 @@ public class CsvReader {
         }
         return launcherMap;
     }
+
     public static List<LaunchAttempt> readAttempts(String filepath, Map<String, Potato> potatoMap, Map<String, Launcher> launcherMap) throws FileNotFoundException {
         List<LaunchAttempt> attemptsList = new ArrayList<>();
         File file = new File(filepath);
@@ -95,7 +96,14 @@ public class CsvReader {
                     int flightRating = Integer.parseInt(parts[4].trim());
 
                     Potato potato = potatoMap.get(potatoId);
+                    if (potato == null) {
+                        throw new IllegalArgumentException("Unknown potatoId: " + potatoId);
+                    }
+
                     Launcher launcher = launcherMap.get(launcherId);
+                    if (launcher == null) {
+                        throw new IllegalArgumentException("Unknown launcherId: " + launcherId);
+                    }
 
                     LaunchAttempt attempt = new LaunchAttempt(attemptId, potato, launcher, payloadKg, flightRating);
                     attemptsList.add(attempt);

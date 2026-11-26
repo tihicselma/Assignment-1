@@ -1,7 +1,7 @@
 public class Launcher {
-    private String id;
-    private String name;
-    private int maxPayloadKg;
+    private final String id;
+    private final String name;
+    private final int maxPayloadKg;
     public Launcher(String id, String name, int maxPayloadKg) {
         this.id=id;
         this.name=name;
